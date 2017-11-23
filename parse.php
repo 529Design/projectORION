@@ -17,7 +17,7 @@ include 'simple_html_dom.php'; include 'event.php';
 //$test = substr($page, $table_start, $table_end - $table_start);
 
 //GEOCODER***********************************************************************************
-function lookup($string){
+function geocode($string){
     
       $string = str_replace (" ", "+", urlencode($string));
       $details_url = "http://maps.googleapis.com/maps/api/geocode/json?address=".$string."&sensor=false";
@@ -49,12 +49,12 @@ function lookup($string){
    }
 //END GEOCODER *******************************************************************
     
-   $city = 'castellani art museum, lewiston';
+   //$city = 'castellani art museum, lewiston';
     
-   $array = lookup($city);
+   //$array = geocode($city);
    //print_r($array);
-   echo $array['latitude'].',';
-   echo $array['longitude'];
+   //echo $array['latitude'].',';
+   //echo $array['longitude'];
 
 
 $events = array();
@@ -97,6 +97,10 @@ foreach ($html->find('ul.event-items div div p, ul.event-items li h3') as $a){//
         $pieces = explode("|", $whole);//parses this p tag in list view data delimited by "|"
         $tempLocation.=$pieces[0];//first half is City/Town of event
         $tempTime=$pieces[1];//second half is the time of the event
+        $array = geocode($tempLocation);
+        //print_r($array);
+        $tempLatitude = $array['latitude'].', ';
+        $tempLongitude = $array['longitude'];
         $stage=4;
         break;
     case 4:
@@ -106,7 +110,7 @@ foreach ($html->find('ul.event-items div div p, ul.event-items li h3') as $a){//
     case 5:
         //echo $a->plaintext.'<br>';
         //echo $tempTitle.' '.$tempLocation.' '.$tempTime.'<br><br>';
-        $tempEvent = new EventContainer($tempTitle, $tempLocation, $tempTime);
+        $tempEvent = new EventContainer($tempTitle, $tempLocation, $tempTime, $tempLatitude, $tempLongitude);
         
         $events[] = $tempEvent;
         $stage=1;
@@ -117,7 +121,8 @@ foreach ($html->find('ul.event-items div div p, ul.event-items li h3') as $a){//
 }
 
 foreach ($events as $event){
-    echo $event->getTitle().'//'.$event->getLocation().'//'.$event->getTime().'<br>';
+    echo $event->getTitle().', '.$event->getLocation().', '.$event->getTime().', '.
+    $event->getLatitude().$event->getLongitude().'<br>';
 }
 
 
