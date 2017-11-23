@@ -5,6 +5,8 @@ class EventContainer{
     protected $title;
     protected $location;
     protected $time;
+    //protected $lat;
+    //protected $lon;
 
     public function __construct($title, $location, $time){
         $this->title = $title;
