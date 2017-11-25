@@ -1,6 +1,6 @@
 <?php
 
-include 'simple_html_dom.php'; include 'event.php';
+include 'simple_html_dom.php'; include 'event.php'; include 'functions.php';
 
 //$table_page = file_get_contents('http://thingstodo.buffalonews.com/events/');
 // Just keep everything after the "Detailed Forecast" image alt text
@@ -17,36 +17,7 @@ include 'simple_html_dom.php'; include 'event.php';
 //$test = substr($page, $table_start, $table_end - $table_start);
 
 //GEOCODER***********************************************************************************
-function geocode($string){
-    
-      $string = str_replace (" ", "+", urlencode($string));
-      $details_url = "http://maps.googleapis.com/maps/api/geocode/json?address=".$string."&sensor=false";
-    
-      $ch = curl_init();
-      curl_setopt($ch, CURLOPT_URL, $details_url);
-      curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-      $response = json_decode(curl_exec($ch), true);
-    
-      // If Status Code is ZERO_RESULTS, OVER_QUERY_LIMIT, REQUEST_DENIED or INVALID_REQUEST
-      if ($response['status'] != 'OK') {
-       return null;
-      }
-    
-      //print_r($response);
-      $geometry = $response['results'][0]['geometry'];
-    
-       $longitude = $geometry['location']['lng'];
-       $latitude = $geometry['location']['lat'];
-    
-       $array = array(
-           'latitude' => $geometry['location']['lat'],
-           'longitude' => $geometry['location']['lng'],
-           'location_type' => $geometry['location_type'],
-       );
-    
-       return $array;
-    
-   }
+
 //END GEOCODER *******************************************************************
     
    //$city = 'castellani art museum, lewiston';
@@ -57,7 +28,7 @@ function geocode($string){
    //echo $array['longitude'];
 
 
-$events = array();
+
 
 //$tempTitle="something";
 //$tempLocation="somewhere";
@@ -71,15 +42,19 @@ $events = array();
 //print_r($events);
 
 //could do without P tag would pull in title also and then have to figure out a way to parse further
+$events = array();
 
 $html=file_get_html('http://thingstodo.buffalonews.com/events/');
 
 $stage=1;
 //div[id=foo]
+$conn = Connect();
+
 foreach ($html->find('ul.event-items div div p, ul.event-items li h3, div[class=event-img] a') as $a){//this pulls in the correct data from p and h3 tags
 
     //echo $a->plaintext.$a->href.'<br><br>';
-    
+         //
+    //$conn->close();//closes the connection
     
     switch($stage){
     case 1:
@@ -104,7 +79,7 @@ foreach ($html->find('ul.event-items div div p, ul.event-items li h3, div[class=
         $tempTime=$pieces[1];//second half is the time of the event
         $array = geocode($tempLocation);
         //print_r($array);
-        $tempLatitude = $array['latitude'].', ';
+        $tempLatitude = $array['latitude'];
         $tempLongitude = $array['longitude'];
         $stage=5;
         break;
@@ -116,14 +91,16 @@ foreach ($html->find('ul.event-items div div p, ul.event-items li h3, div[class=
         //echo $a->plaintext.'<br>';
         //echo $tempTitle.' '.$tempLocation.' '.$tempTime.'<br><br>';
         $tempEvent = new EventContainer($tempLink, $tempTitle, $tempLocation, $tempTime, $tempLatitude, $tempLongitude);
-        
-        $events[] = $tempEvent;
+        InsertEvent($tempEvent, $conn);
+        //$events[] = $tempEvent;
         $stage=1;
         //echo'sucess<br>';
         break;      
     }
     
 }
+
+$conn->close();//closes the connection
 
 foreach ($events as $event){
     echo $event->getTitle().', '.$event->getLocation().', '.$event->getTime().', '.
