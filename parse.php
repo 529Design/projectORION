@@ -75,23 +75,28 @@ $events = array();
 $html=file_get_html('http://thingstodo.buffalonews.com/events/');
 
 $stage=1;
+//div[id=foo]
+foreach ($html->find('ul.event-items div div p, ul.event-items li h3, div[class=event-img] a') as $a){//this pulls in the correct data from p and h3 tags
 
-foreach ($html->find('ul.event-items div div p, ul.event-items li h3') as $a){//this pulls in the correct data from p and h3 tags
-
-    //echo $a->plaintext.'<br><br>';
+    //echo $a->plaintext.$a->href.'<br><br>';
+    
     
     switch($stage){
     case 1:
-        $tempTitle = $a->plaintext;
-        //echo $tempTitle;
+        $tempLink = $a->href;
         $stage=2;
         break;
     case 2:
-        $tempLocation = $a->plaintext.', ';//add coma and space to make location more readable
-        //echo $tempLocation.'||||||';
+        $tempTitle = $a->plaintext;
+        //echo $tempTitle;
         $stage=3;
         break;
     case 3:
+        $tempLocation = $a->plaintext.', ';//add coma and space to make location more readable
+        //echo $tempLocation.'||||||';
+        $stage=4;
+        break;
+    case 4:
         $whole = $a->plaintext;
         //echo $a->plaintext;
         $pieces = explode("|", $whole);//parses this p tag in list view data delimited by "|"
@@ -101,16 +106,16 @@ foreach ($html->find('ul.event-items div div p, ul.event-items li h3') as $a){//
         //print_r($array);
         $tempLatitude = $array['latitude'].', ';
         $tempLongitude = $array['longitude'];
-        $stage=4;
-        break;
-    case 4:
-        //echo $a->plaintext;
         $stage=5;
         break;
     case 5:
+        //echo $a->plaintext;
+        $stage=6;
+        break;
+    case 6:
         //echo $a->plaintext.'<br>';
         //echo $tempTitle.' '.$tempLocation.' '.$tempTime.'<br><br>';
-        $tempEvent = new EventContainer($tempTitle, $tempLocation, $tempTime, $tempLatitude, $tempLongitude);
+        $tempEvent = new EventContainer($tempLink, $tempTitle, $tempLocation, $tempTime, $tempLatitude, $tempLongitude);
         
         $events[] = $tempEvent;
         $stage=1;
@@ -122,7 +127,7 @@ foreach ($html->find('ul.event-items div div p, ul.event-items li h3') as $a){//
 
 foreach ($events as $event){
     echo $event->getTitle().', '.$event->getLocation().', '.$event->getTime().', '.
-    $event->getLatitude().$event->getLongitude().'<br>';
+    $event->getLatitude().$event->getLongitude().', '.$event->getLink().'<br>';
 }
 
 
