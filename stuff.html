@@ -23,6 +23,8 @@
 </head>
 
 <body>
+    <!--PUT NAV HERE-->
+    test
     <div id="map"></div>
 
 
@@ -56,16 +58,20 @@
                     var point = new google.maps.LatLng(
                         parseFloat(markerElem.getAttribute('eventLatitude')),
                         parseFloat(markerElem.getAttribute('eventLongitude')));
-
+                    var time = markerElem.getAttribute('eventTime');
+                    var url = markerElem.getAttribute('eventLink');
                     var infowincontent = document.createElement('div');
-                    var strong = document.createElement('strong');
-                    strong.textContent = name
-                    infowincontent.appendChild(strong);
+
+                    var link = document.createElement('a');
+                    link.href = url;
+                    link.textContent = name + "  " + time;
+                    infowincontent.appendChild(link);
                     infowincontent.appendChild(document.createElement('br'));
 
                     var text = document.createElement('text');
                     text.textContent = address
                     infowincontent.appendChild(text);
+                    //Customize marker data after title here
                     var icon = customLabel[type] || {};
                     var marker = new google.maps.Marker({
                         map: map,
@@ -73,6 +79,10 @@
                         label: icon.label
                     });
                     marker.addListener('click', function() {
+                        infoWindow.setContent(infowincontent);
+                        infoWindow.open(map, marker);
+                    });
+                    marker.addListener('mouseover', function() {
                         infoWindow.setContent(infowincontent);
                         infoWindow.open(map, marker);
                     });

@@ -37,8 +37,8 @@ while ($row = @mysqli_fetch_assoc($result)){
   $node = $dom->createElement("marker");
   $newnode = $parnode->appendChild($node);
   $newnode->setAttribute("eventID",$row['eventID']);
-  $newnode->setAttribute("eventTitle",$row['eventTitle']);
-  $newnode->setAttribute("eventLocation", $row['eventLocation']);
+  $newnode->setAttribute("eventTitle",ucwords($row['eventTitle']));
+  $newnode->setAttribute("eventLocation", ucwords($row['eventLocation']));
   $newnode->setAttribute("eventTime",$row['eventTime']);
   $newnode->setAttribute("eventLatitude", $row['eventLatitude']);
   $newnode->setAttribute("eventLongitude", $row['eventLongitude']);
