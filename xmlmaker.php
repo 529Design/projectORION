@@ -4,7 +4,7 @@ require("phpsqlajax_dbinfo.php");
 
 // Start XML file, create parent node
 
-$dom = new DOMDocument("1.0");
+$dom = new DOMDocument("1.0, UTF-8");
 $node = $dom->createElement("markers");
 $parnode = $dom->appendChild($node);
 

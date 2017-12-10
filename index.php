@@ -2,8 +2,10 @@
 include 'functions.php';
 
 //ADD INTERFACE HERE
+$lat =42.886447;
+$lon =-78.878369;
 
-require 'stuff.html';
+require 'stuff.php';
 
 
 

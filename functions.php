@@ -66,33 +66,6 @@ function geocode($string){
     }
     //END Create MYSQL Table******************************
     
-    /* MYSQL Parse Table - this function makes a connection to a MYSQL database
-        and extracts data from a table.  It then calls the build table function
-        and echos that data back to the page calling it*/
-    function mysql_parse_table(){
-            $ParsedMonths = array();//used to store an array of Month objects
-    
-            $conn = Connect();
-        
-            $sql = "SELECT * FROM monthsTable";//selects all data from the monthstable in the mysql database
-            $result = $conn->query($sql);
-        
-    
-            if ($result->num_rows > 0) {
-        // output data of each row
-                while($row = $result->fetch_assoc()) {
-                    $tempMonth = new Month ($row['monthsID'],$row['monthName'],$row['monthDays']);//creates new month object
-                    array_push($ParsedMonths, $tempMonth);//Pushes a new Month object into the Parsed Months array
-                }
-    
-            echo build_table($ParsedMonths);//calls the build table function and echos the result to HTML
-            } 
-            else {
-                echo "0 results";
-            }
-        $conn->close();//closes the connection
-    }
-    //END MYSQL Parse Table **********************************
     
     /* Connect - establishes a connection to a MYSQL database on a server*/
     function Connect()
