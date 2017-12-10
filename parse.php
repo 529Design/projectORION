@@ -2,7 +2,7 @@
 
 include 'simple_html_dom.php'; include 'event.php'; include 'functions.php';
 
-//create_mysql_table();
+create_mysql_table();
 buffaloNewsParserToDB(); //ACTIVATE TO PARSE TO DB
 
 
