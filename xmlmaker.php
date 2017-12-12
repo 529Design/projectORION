@@ -4,7 +4,7 @@ require("phpsqlajax_dbinfo.php");
 
 // Start XML file, create parent node
 
-$dom = new DOMDocument("1.0, UTF-8");
+$dom = new DOMDocument("1.0");
 $node = $dom->createElement("markers");
 $parnode = $dom->appendChild($node);
 
@@ -37,8 +37,8 @@ while ($row = @mysqli_fetch_assoc($result)){
   $node = $dom->createElement("marker");
   $newnode = $parnode->appendChild($node);
   $newnode->setAttribute("eventID",$row['eventID']);
-  $newnode->setAttribute("eventTitle",ucwords($row['eventTitle']));
-  $newnode->setAttribute("eventLocation", ucwords($row['eventLocation']));
+  $newnode->setAttribute("eventTitle",$row['eventTitle']);
+  $newnode->setAttribute("eventLocation", $row['eventLocation']);
   $newnode->setAttribute("eventTime",$row['eventTime']);
   $newnode->setAttribute("eventLatitude", $row['eventLatitude']);
   $newnode->setAttribute("eventLongitude", $row['eventLongitude']);

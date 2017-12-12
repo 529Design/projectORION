@@ -52,6 +52,8 @@ function geocode($string){
             eventLatitude VARCHAR(15),
             eventLongitude VARCHAR(15),
             eventLink VARCHAR(255),
+            eventCategory VARCHAR(30),
+            eventPrice VARCHAR(30),
             PRIMARY KEY (eventID)
             )";
     

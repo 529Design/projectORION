@@ -5,7 +5,7 @@ include 'functions.php';
 $lat =42.886447;
 $lon =-78.878369;
 
-require 'stuff.php';
+require 'mapGen.php';
 
 
 

@@ -3,74 +3,46 @@
 include 'simple_html_dom.php'; include 'event.php'; include 'functions.php';
 
 
-buffaloNewsTestParser();
+buffaloNewsEventParser('http://thingstodo.buffalonews.com/event/48720/kissmas-bash-2017');
 
-function buffaloNewsTestParser(){
+
+/*BuffaloNewsEventParser - This function extracts price and category info by following a URL
+  from the event site and returns the extracted data to be exploded by a delimeter*/
+function buffaloNewsEventParser($html){
     
-    $html=file_get_html('http://thingstodo.buffalonews.com/event/48637/heritage-discovery-center-research-library');
+    $html=file_get_html($html);//gets filecontents from passed in URL
     
-    //$stage=1;
-    //div[id=foo]
-    //$conn = Connect();
-    //foreach ($html->find('ul.event-items div div p, ul.event-items li h3, div[class=event-img] a') as $a)
-    foreach ($html->find('p.special-p') as $a){//this pulls in the correct data from p and h3 tags
-    
-        echo $a->plaintext.'<br><br>';
-             //
-        //$conn->close();//closes the connection
-        
-        /*
-        switch($stage){
-        case 1:
-            $tempLink = $a->href;
-            echo $tempLink.', ';
-            $stage=2;
-            break;
-        case 2:
-            $tempTitle = $a->plaintext;
-            echo $tempTitle;
-            $stage=3;
-            break;
-        case 3:
-            $tempLocation = $a->plaintext.', ';//add coma and space to make location more readable
-            echo $tempLocation.', ';
-            $stage=4;
-            break;
-        case 4:
-            $whole = $a->plaintext;
-            echo $a->plaintext.', ';
-            $stage=5;
-            break;
-        case 5:
-            echo $a->plaintext.', ';
-            $stage=6;
-            break;
-        case 6:
-            echo $a->plaintext.'<br>';
-            //echo $a->tag.'<br>';
-            //echo $tempTitle.' '.$tempLocation.' '.$tempTime.'<br><br>';
-            //$tempEvent = new EventContainer($tempLink, $tempTitle, $tempLocation, $tempTime, $tempLatitude, $tempLongitude);
-            //InsertEvent($tempEvent, $conn);
-            //$events[] = $tempEvent;
-            //echo '<br>';
-            $stage=1;
-            //echo'sucess<br>';
-            break;  
-               
+    $priceCheck = $catCheck = FALSE;//true false checks needed as price and cat info are not formatted the same on each page
+    $extractPrice = $extractCat = $extract ="";
+
+    foreach ($html->find('p.special-p') as $a){//iterates through html
+
+        $data = $a->plaintext.' ';//all the text inside p tags is now in data
+
+//finds price
+        if($priceCheck == FALSE){
+        $price = strstr($data, 'Price:');
+            if($price != ""){
+                $extractPrice = substr($price, strpos($price, ":") + 1); 
+                $priceCheck = TRUE;
+            }
         }
-         */
-    }
-    
-    //$conn->close();//closes the connection
-    
-    /*
-    foreach ($events as $event){
-        echo $event->getTitle().', '.$event->getLocation().', '.$event->getTime().', '.
-        $event->getLatitude().$event->getLongitude().', '.$event->getLink().'<br>';
-    }
-    */
-    }
+//finds category
+        if($catCheck ==FALSE){
+        $category = strstr($data, 'Category:');
+            if($category != ""){
+                $extractCat = substr($category, strpos($category, ":") + 1);    
+                $catCheck = TRUE;
+            }
+        }
 
+    }
+    $extract = $extractCat . '|' . $extractPrice; //concatenates with | delimeter to be exploded
+    //echo $extract;
+
+    return $extract;
+}
+//END buffaloNewsEventParser *****************************************************
 
 
 /*
