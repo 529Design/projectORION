@@ -43,6 +43,8 @@ while ($row = @mysqli_fetch_assoc($result)){
   $newnode->setAttribute("eventLatitude", $row['eventLatitude']);
   $newnode->setAttribute("eventLongitude", $row['eventLongitude']);
   $newnode->setAttribute("eventLink", $row['eventLink']);
+  $newnode->setAttribute("eventCategory", $row['eventCategory']);
+  $newnode->setAttribute("eventPrice", $row['eventPrice']);
 }
 
 echo $dom->saveXML();

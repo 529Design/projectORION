@@ -47,12 +47,12 @@ function geocode($string){
             $sql = "CREATE TABLE eventsTable (
             eventID INT NOT NULL AUTO_INCREMENT,
             eventTitle VARCHAR(255),
-            eventLocation VARCHAR(255),
+            eventLocation VARCHAR(150),
             eventTime VARCHAR(10),
             eventLatitude VARCHAR(15),
             eventLongitude VARCHAR(15),
             eventLink VARCHAR(255),
-            eventCategory VARCHAR(30),
+            eventCategory VARCHAR(150),
             eventPrice VARCHAR(30),
             PRIMARY KEY (eventID)
             )";
@@ -118,15 +118,25 @@ function geocode($string){
         echo $longitude;
         $longitude = $connection->real_escape_string( $longitude);
 
+        $category = $event->getCategory();
+        echo $category;
+        $category = $connection->real_escape_string( $category);
+
+        $price = $event->getPrice();
+        echo $price;
+        $price = $connection->real_escape_string( $price);
+
         echo '<br>';
     //insert into database
-        $query   = "INSERT into eventsTable (eventTitle, eventLocation, eventTime, eventLatitude, eventLongitude, eventLink) 
+        $query   = "INSERT into eventsTable (eventTitle, eventLocation, eventTime, eventLatitude, eventLongitude, eventLink, eventCategory, eventPrice) 
         VALUES('" . $title . "','" .             
                     $location . "','" .
                     $time . "','" .
                     $latitude . "','" .
                     $longitude . "','" .
-                    $link . "')";
+                    $link . "','" .
+                    $category . "','" .
+                    $price . "')";
                     $success = $connection->query($query);
         
         if (!$success) {
