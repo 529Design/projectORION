@@ -1,169 +1,118 @@
 <?php
 
-include 'simple_html_dom.php'; include 'event.php';
+//This script parses data from the buffalo news events site and puts it into a database
 
-//$table_page = file_get_contents('http://thingstodo.buffalonews.com/events/');
-// Just keep everything after the "Detailed Forecast" image alt text
-//$page = strstr($table_page,'header');
-// Find where the forecast <table> starts
-//$table_start = strpos($page, '<div class="events-day"');
-// Find where the <table> ends
-//$table_end = strpos($page, '<div class="overlay">');
-// And print a slice of $page that holds the table
-//print substr($page, $table_start, $table_end - $table_start);
+set_time_limit(500);//Had to change time limit
+include 'simple_html_dom.php'; include 'event.php'; include 'functions.php';
 
-//print substr($page, $table_start, $table_end - $table_start);
-
-//$test = substr($page, $table_start, $table_end - $table_start);
-
-//GEOCODER***********************************************************************************
-function geocode($string){
-    
-      $string = str_replace (" ", "+", urlencode($string));
-      $details_url = "http://maps.googleapis.com/maps/api/geocode/json?address=".$string."&sensor=false";
-    
-      $ch = curl_init();
-      curl_setopt($ch, CURLOPT_URL, $details_url);
-      curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-      $response = json_decode(curl_exec($ch), true);
-    
-      // If Status Code is ZERO_RESULTS, OVER_QUERY_LIMIT, REQUEST_DENIED or INVALID_REQUEST
-      if ($response['status'] != 'OK') {
-       return null;
-      }
-    
-      //print_r($response);
-      $geometry = $response['results'][0]['geometry'];
-    
-       $longitude = $geometry['location']['lng'];
-       $latitude = $geometry['location']['lat'];
-    
-       $array = array(
-           'latitude' => $geometry['location']['lat'],
-           'longitude' => $geometry['location']['lng'],
-           'location_type' => $geometry['location_type'],
-       );
-    
-       return $array;
-    
-   }
-//END GEOCODER *******************************************************************
-    
-   //$city = 'castellani art museum, lewiston';
-    
-   //$array = geocode($city);
-   //print_r($array);
-   //echo $array['latitude'].',';
-   //echo $array['longitude'];
+create_mysql_table();
+buffaloNewsParserToDB(); //ACTIVATE TO PARSE TO DB
 
 
-$events = array();
+function buffaloNewsParserToDB(){
 
-//$tempTitle="something";
-//$tempLocation="somewhere";
-//$tempTime="sometime";
+//create_mysql_table();
 
-//$tempEvent = new EventContainer($tempTitle, $tempLocation, $tempTime);
-
-//$events[] = $tempEvent;
-
-
-//print_r($events);
-
-//could do without P tag would pull in title also and then have to figure out a way to parse further
+//$events = array();//ACTIVATE for debugging
 
 $html=file_get_html('http://thingstodo.buffalonews.com/events/');
 
 $stage=1;
-//div[id=foo]
+
+$conn = Connect();
+
 foreach ($html->find('ul.event-items div div p, ul.event-items li h3, div[class=event-img] a') as $a){//this pulls in the correct data from p and h3 tags
 
-    //echo $a->plaintext.$a->href.'<br><br>';
-    
-    
     switch($stage){
     case 1:
         $tempLink = $a->href;
+        $tempwhole = buffaloNewsEventParser($tempLink);//follows URL to parse that page
+        $temppieces = explode("|", $tempwhole);
+        $tempCategory = $temppieces[0];
+        $tempPrice = $temppieces[1];
         $stage=2;
         break;
     case 2:
         $tempTitle = $a->plaintext;
-        //echo $tempTitle;
         $stage=3;
         break;
     case 3:
         $tempLocation = $a->plaintext.', ';//add coma and space to make location more readable
-        //echo $tempLocation.'||||||';
         $stage=4;
         break;
     case 4:
         $whole = $a->plaintext;
-        //echo $a->plaintext;
         $pieces = explode("|", $whole);//parses this p tag in list view data delimited by "|"
         $tempLocation.=$pieces[0];//first half is City/Town of event
         $tempTime=$pieces[1];//second half is the time of the event
         $array = geocode($tempLocation);
-        //print_r($array);
-        $tempLatitude = $array['latitude'].', ';
+        $tempLatitude = $array['latitude'];
         $tempLongitude = $array['longitude'];
         $stage=5;
         break;
     case 5:
-        //echo $a->plaintext;
         $stage=6;
         break;
     case 6:
-        //echo $a->plaintext.'<br>';
-        //echo $tempTitle.' '.$tempLocation.' '.$tempTime.'<br><br>';
-        $tempEvent = new EventContainer($tempLink, $tempTitle, $tempLocation, $tempTime, $tempLatitude, $tempLongitude);
-        
-        $events[] = $tempEvent;
+        $tempEvent = new EventContainer($tempLink, $tempTitle, $tempLocation, $tempTime, $tempLatitude, $tempLongitude, $tempCategory, $tempPrice);
+        InsertEvent($tempEvent, $conn);
+        //$events[] = $tempEvent; //ACTIVATE for debugging
         $stage=1;
-        //echo'sucess<br>';
         break;      
-    }
-    
+    }    
 }
 
-foreach ($events as $event){
+
+$conn->close();//closes the connection
+
+//ACTIVATE for debugging
+/* 
+foreach ($events as $event){  
     echo $event->getTitle().', '.$event->getLocation().', '.$event->getTime().', '.
     $event->getLatitude().$event->getLongitude().', '.$event->getLink().'<br>';
 }
-
-
-
-
-
-
-
-/*
-//TITLE//
-$html=file_get_html('http://thingstodo.buffalonews.com/events/');
-
-foreach ($html->find('ul.event-items li h3') as $a){
-
-    echo $a->plaintext.'<br><br>';
+*/
 }
+//END buffaloNewsParserToDB **************************************************************************
 
-//location
-$html=file_get_html('http://thingstodo.buffalonews.com/events/');
 
-foreach ($html->find('ul.event-items li p a') as $a){
+/*BuffaloNewsEventParser - This function extracts price and category info by following a URL
+  from the event site and returns the extracted data to be exploded by a delimeter*/
+  function buffaloNewsEventParser($html){
+    
+    $html=file_get_html($html);//gets filecontents from passed in URL
+    
+    $priceCheck = $catCheck = FALSE;//true false checks needed as price and cat info are not formatted the same on each page
+    $extractPrice = $extractCat = $extract ="";
 
-    echo $a->plaintext.'<br><br>';
+    foreach ($html->find('p.special-p') as $a){//iterates through html
+
+        $data = $a->plaintext.' ';//all the text inside p tags is now in data
+
+//finds price
+        if($priceCheck == FALSE){
+        $price = strstr($data, 'Price:');
+            if($price != ""){
+                $extractPrice = substr($price, strpos($price, ":") + 1); 
+                $priceCheck = TRUE;
+            }
+        }
+//finds category
+        if($catCheck ==FALSE){
+        $category = strstr($data, 'Category:');
+            if($category != ""){
+                $extractCat = substr($category, strpos($category, ":") + 1);
+                $extractCat = strtolower($extractCat);      
+                $catCheck = TRUE;
+            }
+        }
+
+    }
+    $extract = $extractCat . '|' . $extractPrice; //concatenates with | delimeter to be exploded
+    //echo $extract;
+
+    return $extract;
 }
-
-
-
-
-/////$title=$html->find("div#event-details, 0")->plaintext;
-//echo $title;
-
-//THIS WORKS
-/*
-foreach ($html->find('ul.event-items li') as $a){
-
-    echo $a->plaintext.'<br><br>';
-}*/
+//END buffaloNewsEventParser *****************************************************
 
 ?> 
