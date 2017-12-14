@@ -1,43 +1,10 @@
-<!DOCTYPE html >
-<html>
-
-<head>
-    <meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
-    <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
-    <title>Event App</title>
-
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
-    
-    <style>
-        /* Always set the map height explicitly to define the size of the div
-     * element that contains the map. */
-
-        #map {
-            height: 100%;
-            text-transform: capitalize;
-        }
-        /* Optional: Makes the sample page fill the window. */
-        
-        html,
-        body {
-            height: 100%;
-            margin: 0;
-            padding: 0;
-            
-            
-        }
-    </style>
-</head>
-
 <body>
-
     
     <div id="map"></div>
 
-
-
     <script>
-        var customLabel = {
+
+        var customLabel = {//still in development
         art:{
           label: 'A'
         },
@@ -46,15 +13,33 @@
         }
       };
 
+var tempLat = <?php echo(json_encode($_SESSION["lat"]))?>;
+var tempLon = <?php echo(json_encode($_SESSION["lon"]))?>;
+
+//Add autonav function here testing session variables
 
         function initMap() {
             var map = new google.maps.Map(document.getElementById('map'), {
                 //center: new google.maps.LatLng(42.886447, -78.878369),
-                center: new google.maps.LatLng(<?php echo(json_encode($_SESSION["lat"]))?>, <?php echo(json_encode($_SESSION["lon"]))?>),
+                center: new google.maps.LatLng(tempLat, tempLon),
                 zoom: 16
             });
             var infoWindow = new google.maps.InfoWindow;
 
+//YOU ARE HERE MARKER
+            var marker = new google.maps.Marker({
+            position: {lat: tempLat, lng: tempLon},
+            map: map,
+            title: 'You are Here',
+            icon: 
+                { 
+                path: google.maps.SymbolPath.CIRCLE,
+                scale: 8,
+                fillColor: 'red',
+                fillOpacity: 1,      
+                    }
+            });
+        
             // Change this depending on the name of your PHP or XML file
             downloadUrl('xmlmaker.php', function(data) {
                 var xml = data.responseXML;

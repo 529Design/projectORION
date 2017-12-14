@@ -1,12 +1,14 @@
-<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
 <?php
 include 'functions.php';
+
+require 'header.php';
+//require header here with CSS styles
 
 //coords for buffalo
 //$lat =42.886447;
 //$lon =-78.878369;
 
-
+//starts session if it isnt started
     if(session_id() == '' || !isset($_SESSION)) {
         // session isn't started
         session_start();
@@ -21,30 +23,25 @@ include 'functions.php';
             $tempArray = geocode($tempLocation);
             $_SESSION["lat"] = $tempArray['latitude'];
             $_SESSION["lon"] = $tempArray['longitude'];
+            $_SESSION["location"] = $tempLocation;
         }
     }
 
-//load launch screen
+//returns user to home screen by destroying the session
+    if (isset($_GET['home'])){
+            session_destroy();
+            $_SESSION = array();
+    }
+
+//load launch screen - because no session coords are set
     if (!isset($_SESSION['lat']))
     {
         require 'launch.php';
     }
-//load main interface
+//load main interface - because session data is set
     else{
         require 'nav.php';
         require 'mapGen.php';
     }
-    
 
-
-
-
-
-
-
-
-//create_mysql_table();
-//$tempLink=  $tempTitle = $tempLocation = $tempTime = $tempLatitude = $tempLongitude ="";
-
-//$tempEvent = new EventContainer($tempLink, $tempTitle, $tempLocation, $tempTime, $tempLatitude, $tempLongitude);
 ?>

@@ -1,34 +1,4 @@
-
-
-
-
-
-
-<style>
-.custom{
-  width:50%;
-  margin:0 auto;
-  min-width:350px;
-}
-.panel {
-    position: absolute;
-    top: 40%;
-    left: 50%;
-    transform: translateX(-50%) translateY(-50%);
-}
-.panel-heading{
-    text-align:center;
-    
-}
-h4{
-    font-size:4em;
-}
-h3{
-    text-align:center;
-}
-
-</style>
-
+<body>
 <div class="panel panel-default custom">
 <div class="panel-heading"><h4>Proximate Events</h4></div>
 <div class="panel-body">
@@ -51,3 +21,5 @@ h3{
 </div>
 </div>
 </div>
+</body>
+</html>

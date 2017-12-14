@@ -1,4 +1,18 @@
 <?php
+/* Connect - establishes a connection to a MYSQL database on a server*/
+function Connect()
+{
+ $dbhost = "localhost";
+ $dbuser = "root";
+ $dbpass = "";
+ $dbname = "marronja01";
+ 
+ // Create connection
+ $conn = new mysqli($dbhost, $dbuser, $dbpass, $dbname) or die("Connection failed: " . $conn->connect_error);
+
+ return $conn;
+}
+//END Connect***************************************************************
 
 //GEOCODER***********************************************************************************
 function geocode($string){
@@ -33,7 +47,6 @@ function geocode($string){
    }
 //END GEOCODER *******************************************************************
 
-
 /* Create MYSQL Table - This is for portability to create a functional MYSQL table
     in different server environments*/
     function create_mysql_table(){
@@ -66,21 +79,6 @@ function geocode($string){
     }
 //END Create MYSQL Table******************************
     
-    
-/* Connect - establishes a connection to a MYSQL database on a server*/
-    function Connect()
-    {
-     $dbhost = "localhost";
-     $dbuser = "root";
-     $dbpass = "";
-     $dbname = "marronja01";
-     
-     // Create connection
-     $conn = new mysqli($dbhost, $dbuser, $dbpass, $dbname) or die("Connection failed: " . $conn->connect_error);
-    
-     return $conn;
-    }
-//END Connect***************************************************************
 
 //Insert Event - This inserts an event class object into the database
     function InsertEvent($event, $connection){

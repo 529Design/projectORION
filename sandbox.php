@@ -1,24 +1,117 @@
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
 
-<?php
 
-include 'simple_html_dom.php'; include 'event.php'; include 'functions.php';
+<?php
+include 'functions.php';
+require("phpsqlajax_dbinfo.php");
+
+$array =[];
+
+// Create connection
+$conn = Connect();
+// Check connection
+if ($conn->connect_error) {
+    die("Connection failed: " . $conn->connect_error);
+}
+
+//selects data 
+$sql = "SELECT eventID, eventLocation FROM eventstable WHERE NOT eventLatitude";
+$result = $conn->query($sql);
+
+if ($result->num_rows > 0) {
+    // output data of each row
+    while($row = $result->fetch_assoc()) {
+        echo "eventID: " . $row["eventID"]. " eventLocation: " . $row["eventLocation"]. "<br>";
+        $array[$row["eventID"]]=$row["eventLocation"];
+    }
+
+
+} else {
+    echo "0 results";
+}
+$conn->close();
+
+
+
+foreach ($array as $ID=>$Location){
+    echo $ID . ' ' . $Location . '<br>';
+
+
+    //$conn = Connect();
+
+    $temparray = geocode($Location);
+    $tempLatitude = $temparray['latitude'];
+    $tempLongitude = $temparray['longitude'];
+
+    echo  $tempLatitude . ' ' . $tempLongitude . '<br>';
+    /*
+    $query = "UPDATE eventstable SET eventLatitude = $tempLatitude, eventLongitude = $tempLongitude WHERE eventID = $ID";
+
+    $success = $conn->query($query);
+    
+    if (!$success) {
+        die("Couldn't enter data: ".$conn->error);   
+    }
+
+    $conn->close();
+*/
+}
+
+/*
+$sql = "UPDATE eventstable SET email='peterparker_new@mail.com' WHERE id=1";
+
+if(mysqli_query($connection, $sql)){
+
+    echo "Records were updated successfully.";
+
+} else {
+
+    echo "ERROR: Could not able to execute $sql. " . mysqli_error($connection);
+
+}
+
+        $array = geocode($row["eventLocation"]);
+        $tempLatitude = $array['latitude'];
+        $tempLongitude = $array['longitude'];
+        $ID = $row["eventID"];
+
+        $query = "UPDATE eventstable SET eventLatitude=$tempLatitude eventLongitude=$tempLongitude WHERE id=$ID";
+
+        $success = $conn->query($query);
+        
+        if (!$success) {
+            die("Couldn't enter data: ".$conn->error);   
+        }
+
+
+
+
+
+*/
+ 
+
+// Close connection
+
+
+
+
+
+
+
+/*
 
 if(session_id() == '' || !isset($_SESSION)) {
     // session isn't started
     session_start();
 }
+*/
+
 
 //$lat =42.886447;
 //$lon =-78.878369;
 //buffaloNewsEventParser('http://thingstodo.buffalonews.com/event/48720/kissmas-bash-2017');
 
 
-if (!isset($_SESSION['lat']))
-{
-    require 'nav.php';
-    require 'launch.php';
-}
 
 
 
